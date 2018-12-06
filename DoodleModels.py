@@ -49,5 +49,5 @@ class DoodleModels:
     
     def runModel( self, model, epochs = 5, batch_size = 64 ):
         history = model.fit( self.trX, self.trY, epochs = epochs, batch_size = batch_size )
-        tsError, tsAcc = model.evaluate( self.tsX, self.tsY )
-        return ( history, tsError, tsAcc )
+        tsLoss, tsAcc = model.evaluate( self.tsX, self.tsY )
+        return ( history, tsLoss, tsAcc )
