@@ -21,3 +21,10 @@ import dataUtils
 reload(dataUtils) 
 from dataUtils import dataUtils
 logging.warning( "dataUtils loaded" )
+
+if sys.modules.get( 'DoodleModels.DoodleModels', False ) != False :
+    del sys.modules['DoodleModels.DoodleModels'] 
+import DoodleModels
+reload(DoodleModels) 
+from DoodleModels import DoodleModels
+logging.warning( "DoodleModels loaded" )

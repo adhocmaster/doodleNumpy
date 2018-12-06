@@ -76,7 +76,7 @@ class dataUtils:
         
         pass
     
-    def reshapeDataForKeras( X, channel = 1 ):
+    def reshapeDataForKeras( self, X, channel = 1 ):
         
         #TODO update it for multiple channels
         side = int( math.sqrt( X.shape[1] ) )
@@ -84,7 +84,7 @@ class dataUtils:
         
         pass
     
-    def sliceInverse( arr, selectedSeq ):
+    def sliceInverse( self, arr, selectedSeq ):
         
         mask = np.ones( len( data ), np.bool )
         mask[ selectedSeq ] = False
