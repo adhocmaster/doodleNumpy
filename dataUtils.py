@@ -1,5 +1,7 @@
 import numpy as np
 import glob
+import math
+from sklearn.model_selection import train_test_split
 
 class dataUtils:
     
@@ -44,7 +46,7 @@ class dataUtils:
 
             print( "Processing", label, path )
 
-            labelData = np.load( path )
+            labelData = np.load( path ).astype( np.float32 ) / 255
             print( "Observation #:", len( labelData ) )
             self.images.append( labelData )
 
@@ -73,4 +75,20 @@ class dataUtils:
         return ( self.images[seq], self.labels[seq], self.labelLevelMap )
         
         pass
+    
+    def reshapeDataForKeras( X, channel = 1 ):
         
+        #TODO update it for multiple channels
+        side = int( math.sqrt( X.shape[1] ) )
+        return X.reshape( ( X.shape[0], side , side, channel ) )
+        
+        pass
+    
+    def sliceInverse( arr, selectedSeq ):
+        
+        mask = np.ones( len( data ), np.bool )
+        mask[ selectedSeq ] = False
+        return arr[mask]
+        
+        pass
+    
