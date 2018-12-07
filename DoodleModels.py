@@ -26,12 +26,20 @@ class DoodleModels:
         print( "test Y:", self.tsY.shape )
         pass
     
+    def runModel( self, model, epochs = 5, batch_size = 64 ):
+        history = model.fit( self.trX, self.trY, epochs = epochs, batch_size = batch_size )
+        tsLoss, tsAcc = model.evaluate( self.tsX, self.tsY )
+        return ( history, tsLoss, tsAcc )
+    
+    def evaludateModel( self, model ):
+        return model.evaluate( self.tsX, self.tsY )
+    
     def getModel(self, modelNo ):
         
         if modelNo == 1:
             #model 1
             model = models.Sequential()
-            model.add( layers.Conv2D( 16, (3,3), activation = activations.relu, input_shape = (28, 28, 1 ) ) )
+            model.add( layers.Conv2D( 16, (3,3), activation = activations.relu, input_shape = ( 28, 28, 1 ) ) )
             model.add( layers.MaxPooling2D( (2,2) ) )
             model.add( layers.Conv2D( 32, (3,3), activation = activations.relu ))
             model.add( layers.MaxPooling2D( (2,2) ) )
@@ -46,15 +54,52 @@ class DoodleModels:
                 metrics = [ metrics.categorical_accuracy ] 
             )
         
+            return model
+    
+        if modelNo == 3:
+            return self.getConvPoolCNNCModel()
+        if modelNo == 4:
+            return self.getAllCNNC()
+        if modelNo == 5:
+            return self.NINCNN()
+    
+    def getConvPoolCNNCModel( self ):
+        
+        model_input = layers.Input( shape = ( 28, 28, 1 ) )
+        x = layers.Conv2D(96, kernel_size=(3, 3), activation=activations.relu, padding = 'same')(model_input)
+        x = layers.Conv2D(96, (3, 3), activation=activations.relu, padding = 'same')(x)
+        x = layers.Conv2D(96, (3, 3), activation=activations.relu, padding = 'same')(x)
+        x = layers.MaxPooling2D(pool_size=(3, 3), strides = 2)(x)
+        
+        x = layers.Conv2D(192, (3, 3), activation=activations.relu, padding = 'same')(x)
+        x = layers.Conv2D(192, (3, 3), activation=activations.relu, padding = 'same')(x)
+        x = layers.Conv2D(192, (3, 3), activation=activations.relu, padding = 'same')(x)
+        x = layers.MaxPooling2D(pool_size=(3, 3), strides = 2)(x)
+        
+        x = layers.Conv2D(192, (3, 3), activation=activations.relu, padding = 'same')(x)
+        x = layers.Conv2D(192, (1, 1), activation=activations.relu)(x)
+        x = layers.Conv2D(10, (1, 1))(x)
+        
+        x = layers.GlobalAveragePooling2D()(x)
+        x = layers.Activation(activation='softmax')(x)
+
+        model = models.Model(model_input, x, name='conv_pool_cnn')
+
+        model.summary()
+        model.compile( 
+            optimizer = optimizers.rmsprop( lr = .001 ), 
+            loss = losses.categorical_crossentropy,
+            metrics = [ metrics.categorical_accuracy ] 
+        )
+
         return model
     
-    def runModel( self, model, epochs = 5, batch_size = 64 ):
-        history = model.fit( self.trX, self.trY, epochs = epochs, batch_size = batch_size )
-        tsLoss, tsAcc = model.evaluate( self.tsX, self.tsY )
-        return ( history, tsLoss, tsAcc )
+    def getAllCNNC( self ):
+        pass
     
-    def evaludateModel( self, model ):
-        return model.evaluate( self.tsX, self.tsY )
+    def NINCNN( self ):
+        pass
+    
     
     def ensembleModelsByAverageOutput( self, modelList ):
         
