@@ -36,6 +36,8 @@ class DoodleModels:
     
     def getModel(self, modelNo ):
         
+        model_input = layers.Input( shape = ( 28, 28, 1 ) )
+        
         if modelNo == 1:
             #model 1
             model = models.Sequential()
@@ -57,15 +59,14 @@ class DoodleModels:
             return model
     
         if modelNo == 3:
-            return self.getConvPoolCNNCModel()
+            return self.getConvPoolCNNCModel( model_input )
         if modelNo == 4:
-            return self.getAllCNNC()
+            return self.getAllCNNC( model_input )
         if modelNo == 5:
-            return self.NINCNN()
+            return self.NINCNN( model_input )
     
-    def getConvPoolCNNCModel( self ):
+    def getConvPoolCNNCModel( self, model_input ):
         
-        model_input = layers.Input( shape = ( 28, 28, 1 ) )
         x = layers.Conv2D(96, kernel_size=(3, 3), activation=activations.relu, padding = 'same')(model_input)
         x = layers.Conv2D(96, (3, 3), activation=activations.relu, padding = 'same')(x)
         x = layers.Conv2D(96, (3, 3), activation=activations.relu, padding = 'same')(x)
@@ -94,11 +95,65 @@ class DoodleModels:
 
         return model
     
-    def getAllCNNC( self ):
-        pass
+    def getAllCNNC( self, model_input ):
+           
+        x = layers.Conv2D(96, kernel_size=(3, 3), activation= activations.relu, padding = 'same')(model_input)
+        x = layers.Conv2D(96, (3, 3), activation= activations.relu, padding = 'same')(x)
+        x = layers.Conv2D(96, (3, 3), activation= activations.relu, padding = 'same', strides = 2)(x)
+        x = layers.Conv2D(192, (3, 3), activation= activations.relu, padding = 'same')(x)
+        x = layers.Conv2D(192, (3, 3), activation= activations.relu, padding = 'same')(x)
+        x = layers.Conv2D(192, (3, 3), activation= activations.relu, padding = 'same', strides = 2)(x)
+        x = layers.Conv2D(192, (3, 3), activation= activations.relu, padding = 'same')(x)
+        x = layers.Conv2D(192, (1, 1), activation= activations.relu)(x)
+        x = layers.Conv2D(10, (1, 1))(x)
+        x = layers.GlobalAveragePooling2D()(x)
+        x = layers.Activation(activation='softmax')(x)
+
+        model = models.Model(model_input, x, name='all_cnn')
+
+        model.summary()
+        model.compile( 
+            optimizer = optimizers.rmsprop( lr = .001 ), 
+            loss = losses.categorical_crossentropy,
+            metrics = [ metrics.categorical_accuracy ] 
+        )
+
+        return model
     
-    def NINCNN( self ):
-        pass
+    def NINCNN( self, model_input ):
+        
+        #mlpconv block 1
+        x = layers.Conv2D(32, (5, 5), activation= activations.relu,padding='valid')(model_input)
+        x = layers.Conv2D(32, (1, 1), activation= activations.relu)(x)
+        x = layers.Conv2D(32, (1, 1), activation= activations.relu)(x)
+        x = layers.MaxPooling2D((2, 2))(x)
+        x = layers.Dropout(0.5)(x)
+
+        #mlpconv block2
+        x = layers.Conv2D(64, (3, 3), activation= activations.relu,padding='valid')(x)
+        x = layers.Conv2D(64, (1, 1), activation= activations.relu)(x)
+        x = layers.Conv2D(64, (1, 1), activation= activations.relu)(x)
+        x = layers.MaxPooling2D((2, 2))(x)
+        x = layers.Dropout(0.5)(x)
+
+        #mlpconv block3
+        x = layers.Conv2D(128, (3, 3), activation= activations.relu,padding='valid')(x)
+        x = layers.Conv2D(32, (1, 1), activation= activations.relu)(x)
+        x = layers.Conv2D(10, (1, 1))(x)
+
+        x = layers.GlobalAveragePooling2D()(x)
+        x = layers.Activation(activation='softmax')(x)
+
+        model = models.Model(model_input, x, name='nin_cnn')
+
+        model.summary()
+        model.compile( 
+            optimizer = optimizers.rmsprop( lr = .001 ), 
+            loss = losses.categorical_crossentropy,
+            metrics = [ metrics.categorical_accuracy ] 
+        )
+        
+        return model
     
     
     def ensembleModelsByAverageOutput( self, modelList ):
