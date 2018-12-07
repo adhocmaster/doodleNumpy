@@ -63,6 +63,11 @@ class dataUtils:
         
         pass
     
+    def getFileNameWithoutExtensionWindows( self, path ):
+        
+        fileNameWithExtension = path.split( "\\" )[-1]
+        return fileNameWithExtension.split( "." )[0]
+    
     def getData( self ):
         print( self.images.shape, self.labels.shape, self.labelLevelMap )
         return ( self.images, self.labels, self.labelLevelMap )

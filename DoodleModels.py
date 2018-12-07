@@ -1,4 +1,5 @@
-
+import glob
+import logging, sys, math
 from keras import models
 from keras import layers
 from keras import optimizers
@@ -51,3 +52,42 @@ class DoodleModels:
         history = model.fit( self.trX, self.trY, epochs = epochs, batch_size = batch_size )
         tsLoss, tsAcc = model.evaluate( self.tsX, self.tsY )
         return ( history, tsLoss, tsAcc )
+    
+    def evaludateModel( self, model ):
+        return model.evaluate( self.tsX, self.tsY )
+    
+    def ensembleModelsByAverageOutput( self, modelList ):
+        
+        model_input = layers.Input(shape=modelList[0].input_shape[1:]) # c*h*w
+        
+        yModels = [model( model_input ) for model in modelList ]
+        yAvg = layers.average( yModels )
+
+        model = models.Model(inputs = model_input, outputs = yAvg, name='ensemble')
+        return model
+    
+    def ensembleModelDirectoryByAverageOutput( self, modelDirectory ):
+        
+        modelList = self.getModelsFromDirectory( modelDirectory )
+        return self.ensembleModelsByAverageOutput( modelList )
+    
+    def getModelsFromDirectory( self, modelDirectory ):
+        
+        modelPaths = glob.glob( modelDirectory )
+        logging.warning( msg= "# of models found: " + str( len( modelPaths ) ) )
+        
+        unitModels = []
+        for path in modelPaths:
+            modelName = self.getFileNameWithoutExtensionWindows( path )
+            print( modelName )
+            model = models.load_model( path )
+            model.name = modelName
+            unitModels.append( model )   
+            
+        return unitModels
+                                              
+    
+    def getFileNameWithoutExtensionWindows( self, path ):
+        
+        fileNameWithExtension = path.split( "\\" )[-1]
+        return fileNameWithExtension.split( "." )[0]                                        
