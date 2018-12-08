@@ -1,5 +1,6 @@
 import glob
 import logging, sys, math
+import numpy as np
 from keras import models
 from keras import layers
 from keras import optimizers
@@ -11,6 +12,7 @@ class DoodleModels:
     def __init__( self, X, Y, test_size = 0.2, random_state = 39 ):
         self.X = X
         self.Y = Y
+        
         self.test_size = test_size
         self.random_state = random_state
         self.trX, self.tsX, self.trY, self.tsY = train_test_split( 
@@ -19,6 +21,8 @@ class DoodleModels:
                                                     test_size = self.test_size, 
                                                     random_state = self.random_state 
                                                  )
+        
+        self.tsYLabels = np.argmax( self.tsY, axis = 1 )
         
         print( "train X:", self.trX.shape )
         print( "test X:", self.tsX.shape )
@@ -31,8 +35,16 @@ class DoodleModels:
         tsLoss, tsAcc = model.evaluate( self.tsX, self.tsY )
         return ( history, tsLoss, tsAcc )
     
-    def evaludateModel( self, model ):
+    def evaluateModel( self, model ):
         return model.evaluate( self.tsX, self.tsY )
+    
+    def evaluateEnsemble( self, ensemble, batch_size = 32 ):
+        
+        pred = ensemble.predict( self.tsX, batch_size = batch_size)
+        predLabels = np.argmax(pred, axis=1)
+        error = np.sum(np.not_equal(predLabels, self.tsYLabels ) ) / len( self.tsYLabels )
+        
+        return error;
     
     def getModel(self, modelNo ):
         
@@ -58,6 +70,26 @@ class DoodleModels:
         
             return model
     
+        if modelNo == 2:
+            #model 1
+            model = models.Sequential()
+            model.add( layers.Conv2D( 32, (3,3), activation = activations.relu, input_shape = ( 28, 28, 1 ) ) )
+            model.add( layers.MaxPooling2D( (2,2) ) )
+            model.add( layers.Conv2D( 64, (3,3), activation = activations.relu ))
+            model.add( layers.MaxPooling2D( (2,2) ) )
+            model.add( layers.Conv2D( 64, (3,3), activation = activations.relu ))
+            model.add( layers.Flatten() )
+            model.add( layers.Dense( 64, activation = activations.relu ) )
+            model.add( layers.Dense( 10, activation = activations.softmax ) )
+            model.summary()
+            model.compile( 
+                optimizer = optimizers.rmsprop( lr = .001 ), 
+                loss = losses.categorical_crossentropy,
+                metrics = [ metrics.categorical_accuracy ] 
+            )
+        
+            return model
+        
         if modelNo == 3:
             return self.getConvPoolCNNCModel( model_input )
         if modelNo == 4:
@@ -92,7 +124,8 @@ class DoodleModels:
             loss = losses.categorical_crossentropy,
             metrics = [ metrics.categorical_accuracy ] 
         )
-
+        
+        model.name = "basic CNN, 32"
         return model
     
     def getAllCNNC( self, model_input ):
@@ -118,6 +151,7 @@ class DoodleModels:
             metrics = [ metrics.categorical_accuracy ] 
         )
 
+        model.name = "basic CNN, 64"
         return model
     
     def NINCNN( self, model_input ):
