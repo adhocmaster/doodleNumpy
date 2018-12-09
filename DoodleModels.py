@@ -1,6 +1,8 @@
 import glob
 import logging, sys, math
 import numpy as np
+import matplotlib.pyplot as plt
+
 from keras import models
 from keras import layers
 from keras import optimizers
@@ -68,6 +70,7 @@ class DoodleModels:
                 metrics = [ metrics.categorical_accuracy ] 
             )
         
+            model.name = "basic CNN, 32"
             return model
     
         if modelNo == 2:
@@ -88,6 +91,7 @@ class DoodleModels:
                 metrics = [ metrics.categorical_accuracy ] 
             )
         
+            model.name = "basic CNN, 64"
             return model
         
         if modelNo == 3:
@@ -99,6 +103,8 @@ class DoodleModels:
     
     def getConvPoolCNNCModel( self, model_input ):
         
+        return self.getConvPoolCNNCModelReduced( model_input )
+    
         x = layers.Conv2D(96, kernel_size=(3, 3), activation=activations.relu, padding = 'same')(model_input)
         x = layers.Conv2D(96, (3, 3), activation=activations.relu, padding = 'same')(x)
         x = layers.Conv2D(96, (3, 3), activation=activations.relu, padding = 'same')(x)
@@ -125,9 +131,32 @@ class DoodleModels:
             metrics = [ metrics.categorical_accuracy ] 
         )
         
-        model.name = "basic CNN, 32"
         return model
     
+    def getConvPoolCNNCModelReduced( self, model_input ):
+        
+        x = layers.Conv2D(96, kernel_size=(3, 3), activation=activations.relu, padding = 'same')(model_input)
+        x = layers.Conv2D(96, (3, 3), activation=activations.relu, padding = 'same')(x)
+        x = layers.Conv2D(96, (3, 3), activation=activations.relu, padding = 'same')(x)
+        x = layers.MaxPooling2D(pool_size=(3, 3), strides = 2)(x)
+        
+        x = layers.Conv2D(192, (3, 3), activation=activations.relu, padding = 'same')(x)
+        x = layers.Conv2D(192, (1, 1), activation=activations.relu)(x)
+        x = layers.Conv2D(10, (1, 1))(x)
+        
+        x = layers.GlobalAveragePooling2D()(x)
+        x = layers.Activation(activation='softmax')(x)
+
+        model = models.Model(model_input, x, name='conv_pool_cnn reduced')
+
+        model.summary()
+        model.compile( 
+            optimizer = optimizers.rmsprop( lr = .001 ), 
+            loss = losses.categorical_crossentropy,
+            metrics = [ metrics.categorical_accuracy ] 
+        )
+        
+        return model
     def getAllCNNC( self, model_input ):
            
         x = layers.Conv2D(96, kernel_size=(3, 3), activation= activations.relu, padding = 'same')(model_input)
@@ -151,7 +180,6 @@ class DoodleModels:
             metrics = [ metrics.categorical_accuracy ] 
         )
 
-        model.name = "basic CNN, 64"
         return model
     
     def NINCNN( self, model_input ):
@@ -224,4 +252,27 @@ class DoodleModels:
     def getFileNameWithoutExtensionWindows( self, path ):
         
         fileNameWithExtension = path.split( "\\" )[-1]
-        return fileNameWithExtension.split( "." )[0]                                        
+        return fileNameWithExtension.split( "." )[0]   
+    
+    def plotModelTrainPerformance( self, model, savePath = "" ):
+        
+        history = model.history
+        
+        print( history.history )
+        
+        epochX = np.arange( len( history.epoch ) ) + 1
+        plt.close()
+        plt.plot( epochX, history.history['categorical_accuracy'], color = "blue", label = "accuracy" )
+        plt.plot( epochX, history.history['loss'], color = "red", label = "loss" )
+
+        plt.title( 'Epoch vs Test ' + model.name )
+        plt.xlabel( "Epoch" )
+        plt.ylabel( "amount" )
+        plt.xticks( epochX )
+        plt.legend()
+        
+        if savePath != "":
+            plt.savefig( savePath )
+            print( "saved model performance plot at:", savePath )
+        
+        
