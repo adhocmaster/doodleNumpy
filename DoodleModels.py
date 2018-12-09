@@ -357,11 +357,12 @@ class DoodleModels:
         model.save( modelPath )
         print( "saved frozen model at", modelPath )
         
-        historyPath = modelPath.replace( ".h5", "_history.json")
-        with open( historyPath, mode = 'w+' ) as f:
-            json.dump( model.history.history, f )
-        
-        print( "saved frozen model history at", historyPath )    
+        if hasattr(model, 'history') :
+            historyPath = modelPath.replace( ".h5", "_history.json")
+            with open( historyPath, mode = 'w+' ) as f:
+                json.dump( model.history.history, f )
+            print( "saved frozen model history at", historyPath )    
+            
         pass
     
     def plotModelTrainPerformance( self, model, savePath = "" ):
