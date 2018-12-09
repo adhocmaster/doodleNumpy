@@ -100,11 +100,11 @@ class DoodleModels:
             return model
         
         if modelNo == 3:
-            return self.getConvPoolCNNCModel( model_input )
+            return self.getConvPoolCNNCModel( model_input, learningRate )
         if modelNo == 4:
-            return self.getAllCNNC( model_input )
+            return self.getAllCNNC( model_input, learningRate )
         if modelNo == 5:
-            return self.NINCNN( model_input )
+            return self.NINCNN( model_input, learningRate )
         
         
         if modelNo == 6:
