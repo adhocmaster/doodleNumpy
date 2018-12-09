@@ -51,7 +51,7 @@ class DoodleModels:
         predLabels = np.argmax(pred, axis=1)
         error = np.sum(np.not_equal(predLabels, self.tsYLabels ) ) / len( self.tsYLabels )
         
-        return error;
+        return 1 - error;
     
     def getModel(self, modelNo, learningRate = 0.001 ):
         
@@ -338,7 +338,7 @@ class DoodleModels:
         
         unitModels = []
         for path in modelPaths:
-            modelName = self.getFileNameWithoutExtensionWindows( path )
+            modelName = self.getFileNameWithoutExtensionWindows( path ).replace( " ", "_" ).replace( ",", "_" )
             print( modelName )
             model = models.load_model( path )
             model.name = modelName
@@ -350,7 +350,7 @@ class DoodleModels:
     def getFileNameWithoutExtensionWindows( self, path ):
         
         fileNameWithExtension = path.split( "\\" )[-1]
-        return fileNameWithExtension.split( "." )[0]   
+        return '-'.join( fileNameWithExtension.split( "." )[0:-1] )
     
     def saveModelAndHistory( self, model, modelPath ):
         
