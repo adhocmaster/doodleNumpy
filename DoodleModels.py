@@ -339,6 +339,9 @@ class DoodleModels:
         
         unitModels = []
         for path in modelPaths:
+            
+            if 'ensemble' in path:
+                continue
             modelName = self.getFileNameWithoutExtensionWindows( path ).replace( " ", "_" ).replace( ",", "_" )
             print( modelName )
             model = models.load_model( path )
