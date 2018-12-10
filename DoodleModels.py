@@ -19,6 +19,7 @@ class DoodleModels:
         self.numberOfAvailableModels = 8
         self.X = X
         self.Y = Y
+        self.outputShape = Y.shape[1]
         
         self.test_size = test_size
         self.random_state = random_state
@@ -67,7 +68,7 @@ class DoodleModels:
             model.add( layers.Conv2D( 32, (3,3), activation = activations.relu ))
             model.add( layers.Flatten() )
             model.add( layers.Dense( 32, activation = activations.relu ) )
-            model.add( layers.Dense( 10, activation = activations.softmax ) )
+            model.add( layers.Dense( self.outputShape, activation = activations.softmax ) )
             model.summary()
             model.compile( 
                 optimizer = optimizers.rmsprop( lr = learningRate ), 
@@ -88,7 +89,7 @@ class DoodleModels:
             model.add( layers.Conv2D( 64, (3,3), activation = activations.relu ))
             model.add( layers.Flatten() )
             model.add( layers.Dense( 64, activation = activations.relu ) )
-            model.add( layers.Dense( 10, activation = activations.softmax ) )
+            model.add( layers.Dense( self.outputShape, activation = activations.softmax ) )
             model.summary()
             model.compile( 
                 optimizer = optimizers.rmsprop( lr = learningRate ), 
@@ -121,7 +122,7 @@ class DoodleModels:
             model.add( layers.Flatten() )
             
             model.add( layers.Dense( 64, activation = activations.relu ) )
-            model.add( layers.Dense( 10, activation = activations.softmax ) )
+            model.add( layers.Dense( self.outputShape, activation = activations.softmax ) )
             
             model.summary()
             model.compile( 
@@ -153,7 +154,7 @@ class DoodleModels:
             
             model.add( layers.Flatten() )
             model.add( layers.Dense( 64, activation = activations.relu ) )
-            model.add( layers.Dense( 10, activation = activations.softmax ) )
+            model.add( layers.Dense( self.outputShape, activation = activations.softmax ) )
             
             model.summary()
             model.compile( 
@@ -187,7 +188,7 @@ class DoodleModels:
             
             model.add( layers.Flatten() )
             model.add( layers.Dense( 64, activation = activations.relu ) )
-            model.add( layers.Dense( 10, activation = activations.softmax ) )
+            model.add( layers.Dense( self.outputShape, activation = activations.softmax ) )
             
             model.summary()
             model.compile( 
@@ -215,7 +216,7 @@ class DoodleModels:
         
         x = layers.Conv2D(192, (3, 3), activation=activations.relu, padding = 'same')(x)
         x = layers.Conv2D(192, (1, 1), activation=activations.relu)(x)
-        x = layers.Conv2D(10, (1, 1))(x)
+        x = layers.Conv2D(self.outputShape, (1, 1))(x)
         
         x = layers.GlobalAveragePooling2D()(x)
         x = layers.Activation(activation='softmax')(x)
@@ -240,7 +241,7 @@ class DoodleModels:
         
         x = layers.Conv2D(192, (3, 3), activation=activations.relu, padding = 'same')(x)
         x = layers.Conv2D(192, (1, 1), activation=activations.relu)(x)
-        x = layers.Conv2D(10, (1, 1))(x)
+        x = layers.Conv2D(self.outputShape, (1, 1))(x)
         
         x = layers.GlobalAveragePooling2D()(x)
         x = layers.Activation(activation='softmax')(x)
@@ -265,7 +266,7 @@ class DoodleModels:
         x = layers.Conv2D(192, (3, 3), activation= activations.relu, padding = 'same', strides = 2)(x)
         x = layers.Conv2D(192, (3, 3), activation= activations.relu, padding = 'same')(x)
         x = layers.Conv2D(192, (1, 1), activation= activations.relu)(x)
-        x = layers.Conv2D(10, (1, 1))(x)
+        x = layers.Conv2D(self.outputShape, (1, 1))(x)
         x = layers.GlobalAveragePooling2D()(x)
         x = layers.Activation(activation='softmax')(x)
 
@@ -299,7 +300,7 @@ class DoodleModels:
         #mlpconv block3
         x = layers.Conv2D(128, (3, 3), activation= activations.relu,padding='valid')(x)
         x = layers.Conv2D(32, (1, 1), activation= activations.relu)(x)
-        x = layers.Conv2D(10, (1, 1))(x)
+        x = layers.Conv2D(self.outputShape, (1, 1))(x)
 
         x = layers.GlobalAveragePooling2D()(x)
         x = layers.Activation(activation='softmax')(x)
