@@ -20,7 +20,7 @@ from ResNet2 import ResnetBuilder
 class DoodleModels:
     def __init__( self, X, Y, test_size = 0.2, random_state = 39 ):
         
-        self.numberOfAvailableModels = 10
+        self.numberOfAvailableModels = 11
         self.X = X
         self.Y = Y
         self.outputShape = Y.shape[1]
@@ -217,7 +217,17 @@ class DoodleModels:
         
             model.name = "build_resnet_18"
             return model
-            
+        if modelNo == 11:
+            model =  ResnetBuilder.build_resnet_50( (1, 28, 28 ), self.outputShape )
+            model.summary()
+            model.compile( 
+                optimizer = optimizers.rmsprop( lr = learningRate ), 
+                loss = losses.categorical_crossentropy,
+                metrics = [ metrics.categorical_accuracy ] 
+            )
+        
+            model.name = "build_resnet_50"
+            return model
     
     def getConvPoolCNNCModel( self, model_input, learningRate = 0.001  ):
         
