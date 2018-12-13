@@ -35,3 +35,17 @@ import DoodleModels
 reload(DoodleModels) 
 from DoodleModels import DoodleModels
 logging.warning( "DoodleModels loaded" )
+
+if sys.modules.get( 'ResNet', False ) != False :
+    del sys.modules['ResNet'] 
+import ResNet
+reload(ResNet) 
+from ResNet import ResNet
+logging.warning( "ResNet loaded" )
+
+if sys.modules.get( 'ResNet2', False ) != False :
+    del sys.modules['ResNet2'] 
+import ResNet2
+reload(ResNet2) 
+from ResNet2 import ResnetBuilder
+logging.warning( "ResnetBuilder loaded" )

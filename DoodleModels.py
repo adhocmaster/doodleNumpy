@@ -13,10 +13,14 @@ from keras import metrics
 from keras import regularizers
 
 from sklearn.model_selection import train_test_split
+
+from ResNet import ResNet
+from ResNet2 import ResnetBuilder
+
 class DoodleModels:
     def __init__( self, X, Y, test_size = 0.2, random_state = 39 ):
         
-        self.numberOfAvailableModels = 8
+        self.numberOfAvailableModels = 10
         self.X = X
         self.Y = Y
         self.outputShape = Y.shape[1]
@@ -199,6 +203,21 @@ class DoodleModels:
         
             model.name = "basic CNN, 64, Dropout 0.2, L2 .01"
             return model
+        
+        if modelNo == 9:
+            return self.wideNet( model_input, learningRate )
+        if modelNo == 10:
+            model =  ResnetBuilder.build_resnet_18( (1, 28, 28 ), self.outputShape )
+            model.summary()
+            model.compile( 
+                optimizer = optimizers.rmsprop( lr = learningRate ), 
+                loss = losses.categorical_crossentropy,
+                metrics = [ metrics.categorical_accuracy ] 
+            )
+        
+            model.name = "build_resnet_18"
+            return model
+            
     
     def getConvPoolCNNCModel( self, model_input, learningRate = 0.001  ):
         
@@ -225,7 +244,7 @@ class DoodleModels:
 
         model.summary()
         model.compile( 
-            optimizer = optimizers.rmsprop( lr = .001 ), 
+            optimizer = optimizers.rmsprop( lr = learningRate ), 
             loss = losses.categorical_crossentropy,
             metrics = [ metrics.categorical_accuracy ] 
         )
@@ -314,6 +333,32 @@ class DoodleModels:
             metrics = [ metrics.categorical_accuracy ] 
         )
         
+        return model
+    
+    def wideNet( self , model_input, learningRate = 0.001 ):
+        
+        model = models.Sequential()
+        model.add( layers.Conv2D( 128, (3,3), activation = activations.relu, input_shape = ( 28, 28, 1 ) ) )
+        model.add( layers.MaxPooling2D( (2,2) ) )
+        model.add( layers.Dropout( 0.2 ) )
+
+        model.add( layers.Conv2D( 128, (3,3), activation = activations.relu ))
+        model.add( layers.MaxPooling2D( (2,2) ) )
+
+        model.add( layers.Conv2D( 64, (3,3), activation = activations.relu ))
+        model.add( layers.Flatten() )
+
+        model.add( layers.Dense( 64, activation = activations.relu ) )
+        model.add( layers.Dense( self.outputShape, activation = activations.softmax ) )
+
+        model.summary()
+        model.compile( 
+            optimizer = optimizers.rmsprop( lr = learningRate ), 
+            loss = losses.categorical_crossentropy,
+            metrics = [ metrics.categorical_accuracy ] 
+        )
+
+        model.name = "wideNet, 128, Dropout 0.2"
         return model
     
     
